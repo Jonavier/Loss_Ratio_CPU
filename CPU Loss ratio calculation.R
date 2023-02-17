@@ -38,10 +38,10 @@ periodo <- c(2017, 2018, 2019, 2020, 2021)
 for (i in periodo) {
  
   #-------------------------------------------------------------------------------
-  #                     Sección 1. Cargar bases de datos y ajustar
+  #                     Section 1. Load databases and adjust
   #-------------------------------------------------------------------------------
   
-  # Cargar bases de datos ####
+  # Load databases ####
   
   g1 <- read_excel(paste0("./Datos/Originales/",i,".xlsx"), sheet = "FT001-01", skip = 17)
   g2 <- read_excel(paste0("./Datos/Originales/",i,".xlsx"), sheet = "FT001-02", skip = 17)
@@ -59,7 +59,7 @@ for (i in periodo) {
     g2_1 <- read_excel(paste0("./Datos/Originales/",i,".xlsx"), sheet = "FT001-02_1", skip = 17)
   }
   
-  # Organizar bases de datos ####
+  # Organize databases ####
   
   g1 <- g1 %>% pivot_longer(cols=starts_with(c("8","9")),names_to="EPS",values_to="cost")  %>% dplyr::filter(!is.na(LENGTH))
   g2 <- g2 %>% pivot_longer(cols=starts_with(c("8","9")),names_to="EPS",values_to="cost")  %>% dplyr::filter(!is.na(LENGTH))
@@ -76,7 +76,7 @@ for (i in periodo) {
     g2_1 <- g2_1 %>% pivot_longer(cols=starts_with(c("8","9")),names_to="EPS",values_to="cost")  %>% dplyr::filter(!is.na(LENGTH))
   }
   
-  # Unir en la  misma tabla #### 
+  # Join in the same table #### 
   
   if(i == "2019"){
     base <- rbind(g1,g2,g6,g7,g8,g7_1)
@@ -95,7 +95,7 @@ for (i in periodo) {
   colnames(base)[6] <- colnames(EPS)[2]
   base <- left_join(base,EPS,by="NIT")
   
-  # Modificar grupo según Resolución ####
+  # Modify group according to resolution ####
   
   base <- base %>% rename(GRUPO = `GRUPO:`)
   
@@ -116,14 +116,14 @@ for (i in periodo) {
   }
   
   #-------------------------------------------------------------------------------
-  #                     Sección 2. Cálculo de ingresos y costos
+  #                     Section 2. Calculation of income and costs
   #-------------------------------------------------------------------------------
   
   ################################################################################
-  #############################  Régimen contributivo    #########################
+  #############################  Contributory regime    #########################
   ################################################################################
   
-  # Ingresos ####
+  # Incomes ####
   
   ingresos_rc_niif_1_2 <- base %>% dplyr::filter(GRUPO %in% c(1,2))
   ingresos_rc_niif_1_2 <- ingresos_rc_niif_1_2 %>% filter(COD %in% c("41020101", "410202", "410203", "41020801", "41020901"))
@@ -143,7 +143,7 @@ for (i in periodo) {
   ingresos_rc <- left_join(ingresos_rc, Ingresos_Codigos) %>% 
     select(c(COD, NIT, cost, NOMBRE, niif, Regimen, Cuenta))
 
-  # Costos ####
+  # Costs ####
   
   costos_rc_niif_1_2 <- base %>% dplyr::filter(GRUPO %in% c(1,2))
   costos_rc_niif_1_2 <- costos_rc_niif_1_2 %>% filter(COD %in% c("61020101", "61020301", "61020401", "61020601", "61021001", 
@@ -172,10 +172,10 @@ for (i in periodo) {
     select(c(COD, NIT, cost, NOMBRE, niif, Regimen, Cuenta))
   
   ################################################################################
-  ##############################  Régimen subsidiado    ##########################
+  ##############################  Subsidized regime   ##########################
   ################################################################################
   
-  # Ingresos ####
+  # Incomes ####
   
   ingresos_rs_niif_1_2 <- base %>% dplyr::filter(GRUPO %in% c(1,2))
   ingresos_rs_niif_1_2 <- ingresos_rs_niif_1_2 %>% filter(COD %in% c("41020102", "41020902"))
@@ -195,7 +195,7 @@ for (i in periodo) {
   ingresos_rs <- left_join(ingresos_rs, Ingresos_Codigos) %>% 
     select(c(COD, NIT, cost, NOMBRE, niif, Regimen, Cuenta))
   
-  # Costos ####
+  # Costs ####
   
   costos_rs_niif_1_2 <- base %>% dplyr::filter(GRUPO %in% c(1,2))
   costos_rs_niif_1_2 <- costos_rs_niif_1_2 %>% filter(COD %in% c("61020102", "61020302", "61020402", "61020602", "61021002", 
@@ -231,7 +231,7 @@ for (i in periodo) {
   rm(costos_rc, costos_rs)
   
   #------------------------------------------------------------------------------------
-  #                     Sección 3. Cálculo de reservas técnicas para RCP 6, 7 y 8
+  #          Section 3. Calculation of technical reserves for PAR 6, 7 and 8
   #------------------------------------------------------------------------------------  
   
   reservas_tecnicas <- base %>% dplyr::filter(GRUPO %in% c(6,7,8))
@@ -253,7 +253,7 @@ for (i in periodo) {
   reservas_tecnicas$Tipo <- "Reservas técnicas"
   
   #------------------------------------------------------------------------------------
-  #                     Sección 4. Cálculo de liberación de reservas
+  #                     Section 4. Calculation of reserve release
   #------------------------------------------------------------------------------------  
   
   liberacion_niif_1_2 <- base %>% dplyr::filter(GRUPO %in% c(1,2))
@@ -380,7 +380,7 @@ for (i in periodo) {
   
   
   #---------------------------------------------------------------------------------------------------
-  #     Sección 5. Unir las bases de ingresos, costos, reservas técnicas y liberación de reservas
+  #     Section 5. Unite the bases of income, costs, technical reserves and release of reserves
   #--------------------------------------------------------------------------------------------------- 
 
   base <- rbind(ingresos, costos)
@@ -398,7 +398,7 @@ for (i in periodo) {
 rm(Costos_Codigos_Contributivo, Costos_Codigos_Subsidiado, Costos_Codigos_Reservas, Ingresos_Codigos, Liberacion_Codigos, base)
 
 #------------------------------------------------------------------------------------
-#                     Sección 6. Cálculo de siniestralidad
+#                     Section 6. Calculation of loss ratio
 #------------------------------------------------------------------------------------ 
 
 Consolidado$Regimen[Consolidado$Regimen == "CONTRIBUTIVO"] <- "Contributivo"
@@ -474,21 +474,18 @@ Siniestralidad_Clasificacion[is.na(Siniestralidad_Clasificacion)] <- 0
 Siniestralidad_Clasificacion <- Siniestralidad_Clasificacion %>% 
   mutate(IS = (Costos + `Reservas técnicas` - Liberación)/Ingresos)
 
-# Create a blank workbook
+# Export to excel
 OUT <- createWorkbook()
 
-# Add some sheets to the workbook
 addWorksheet(OUT, "Cuentas")
 addWorksheet(OUT, "Siniestralidad Total")
 addWorksheet(OUT, "Siniestralidad EPS")
 addWorksheet(OUT, "Siniestralidad NIIF")
 
-# Write the data to the sheets
 writeData(OUT, sheet = "Cuentas", x = Participacion_Cuentas)
 writeData(OUT, sheet = "Siniestralidad Total", x = Siniestralidad)
 writeData(OUT, sheet = "Siniestralidad EPS", x = Siniestralidad_EPS)
 writeData(OUT, sheet = "Siniestralidad NIIF", x = Siniestralidad_Clasificacion)
 
-# Export the file
-saveWorkbook(OUT, "./Datos/Salidas/Consolidado_UPC_16022023.xlsx")
+saveWorkbook(OUT, "./Datos/Salidas/Consolidado_UPC.xlsx")
 
